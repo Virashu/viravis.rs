@@ -23,6 +23,9 @@ struct Args {
 
     #[arg(short, long)]
     port: Option<String>,
+
+    #[arg(long, action)]
+    graph: bool,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -46,6 +49,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mutex_ref = Arc::clone(&data_mutex);
     thread::spawn(|| {
         let mut s = Server::new(mutex_ref);
+        log::info!("Starting server");
         s.run();
     });
 
@@ -54,6 +58,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mutex_ref = Arc::clone(&data_mutex);
         thread::spawn(|| {
             let s = Serial::new(mutex_ref, port);
+            log::info!("Opening serial port");
             s.run();
         });
     }
@@ -61,13 +66,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut v = Viravis::new(SIZE, args.mode)?;
 
     v.add_callback(cb);
-    // v.add_callback(viravis::graph::print_graph);
 
-    print!("\x1b[?25l");
-    ctrlc::set_handler(|| {
-        print!("\x1b[H\x1b[J\x1b[?25h^C");
-        std::process::exit(0);
-    })?;
+    if args.graph {
+        v.add_callback(viravis::graph::print_graph);
+
+        print!("\x1b[?25l");
+        ctrlc::set_handler(|| {
+            print!("\x1b[H\x1b[J\x1b[?25h^C");
+            std::process::exit(0);
+        })?;
+    }
 
     let orig_hook = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |panic_info| {
@@ -75,6 +83,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         std::process::exit(1);
     }));
 
+    log::info!("Starting Viravis!");
     v.run()?;
 
     Ok(())

@@ -48,6 +48,8 @@ impl Viravis {
         let host = cpal::default_host();
         let device = host.default_output_device().unwrap();
 
+        log::info!("Selected device: `{}`", device.name().unwrap());
+
         let mut supported_configs_range = device
             .supported_output_configs()
             .expect("error while querying configs");
