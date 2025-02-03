@@ -45,7 +45,7 @@ impl Serial {
             // [1,2,3]
             let data = self.get_data();
             port.write_all(data.as_bytes()).unwrap();
-            thread::sleep(Duration::from_millis(10));
+            thread::sleep(Duration::from_millis(20));
         }
     }
 }

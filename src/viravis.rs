@@ -46,9 +46,9 @@ pub struct Viravis {
 impl Viravis {
     pub fn new(size: usize, mode: AnalyzerMode) -> Result<Self, Box<dyn Error>> {
         let host = cpal::default_host();
-        let device = host.default_output_device().unwrap();
+        let device = host.default_output_device().expect("No default output device");
 
-        log::info!("Selected device: `{}`", device.name().unwrap());
+        log::info!("Selected device: `{}`", device.name()?);
 
         let mut supported_configs_range = device
             .supported_output_configs()
@@ -96,7 +96,7 @@ impl Viravis {
         self.stream.play()?;
 
         loop {
-            let data = self.channel.recv().unwrap();
+            let data = self.channel.recv()?;
             self.update(data);
         }
     }

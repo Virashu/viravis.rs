@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 pub fn mean(input: &[f32]) -> f32 {
     let l: f32 = input.len() as f32;
     let s: f32 = input.iter().sum();
@@ -8,6 +10,17 @@ pub fn mean_abs(input: &[f32]) -> f32 {
     let l: f32 = input.len() as f32;
     let s: f32 = input.iter().map(|n| n.abs()).sum();
     s / l
+}
+
+pub fn mean_nonzero(input: VecDeque<f32>) -> f32 {
+    let i = input.iter().map(|n| n.abs()).filter(|n| *n != 0.0);
+    let s: f32 = i.clone().sum();
+    let l: f32 = i.count() as f32;
+    if l != 0.0 {
+        s / l
+    } else {
+        1.0
+    }
 }
 
 /// Window is:

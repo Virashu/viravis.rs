@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 use super::{
-    utils::{fade_exponent, mean_abs, moving_average},
+    utils::{fade_exponent, mean_abs, mean_nonzero, moving_average},
     Analyzer,
 };
 
@@ -21,10 +21,14 @@ impl AnalyzerRolling {
 
 impl Analyzer for AnalyzerRolling {
     fn analyze(&mut self, data: &[f32], _: &cpal::InputCallbackInfo) {
-        let avg = mean_abs(data) * 1000.0;
+        let mut avg = mean_abs(data) * 1000.0;
+
+        // Equalizing
+        let baseline = mean_nonzero(self.hist.clone());
+        avg /= baseline;
 
         // Rotate
-        self.hist.push_front(avg);
+        self.hist.push_front(avg / baseline * 100.0);
         self.hist.pop_back().unwrap();
 
         // Fade
