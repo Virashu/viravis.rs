@@ -22,7 +22,7 @@ impl std::str::FromStr for AnalyzerMode {
         match s {
             "rolling" => Ok(Self::Rolling),
             "fft" => Ok(Self::Fft),
-            _ => Err(format!("Unknown log level: {s}")),
+            _ => Err(format!("Unknown mode: {s}")),
         }
     }
 }
@@ -46,7 +46,9 @@ pub struct Viravis {
 impl Viravis {
     pub fn new(size: usize, mode: AnalyzerMode) -> Result<Self, Box<dyn Error>> {
         let host = cpal::default_host();
-        let device = host.default_output_device().expect("No default output device");
+        let device = host
+            .default_output_device()
+            .expect("No default output device");
 
         log::info!("Selected device: `{}`", device.name()?);
 
