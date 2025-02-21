@@ -1,13 +1,14 @@
 use std::error::Error;
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::{BufferSize, InputCallbackInfo, StreamConfig};
+use cpal::{BufferSize, InputCallbackInfo, SampleRate, StreamConfig};
 
 use std::sync::mpsc::{channel, Receiver};
 
 use crate::analyzers::{self, Analyzer};
 
 const CHUNK: u32 = 960;
+const SAMPLE_RATE: u32 = 48_000;
 
 #[derive(Clone)]
 pub enum AnalyzerMode {
@@ -63,7 +64,7 @@ impl Viravis {
 
         let config = StreamConfig {
             channels: supported_config.channels(),
-            sample_rate: supported_config.sample_rate(),
+            sample_rate: SampleRate(SAMPLE_RATE),
             buffer_size: BufferSize::Fixed(CHUNK),
         };
 
