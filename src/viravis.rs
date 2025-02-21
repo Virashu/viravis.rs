@@ -67,6 +67,8 @@ impl Viravis {
             buffer_size: BufferSize::Fixed(CHUNK),
         };
 
+        log::info!("Selected config: {:?}", config);
+
         let (tx, rx) = channel();
 
         let cb = move |d| tx.send(d).unwrap();
