@@ -26,6 +26,9 @@ struct Args {
 
     #[arg(long, action)]
     graph: bool,
+
+    #[arg(long)]
+    sample_rate: Option<u32>,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -63,7 +66,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         });
     }
 
-    let mut v = Viravis::new(SIZE, args.mode)?;
+    let mut v = Viravis::new(SIZE, args.mode, args.sample_rate)?;
 
     v.add_callback(cb);
 

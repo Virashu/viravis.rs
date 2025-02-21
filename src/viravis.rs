@@ -45,7 +45,7 @@ pub struct Viravis {
 }
 
 impl Viravis {
-    pub fn new(size: usize, mode: AnalyzerMode) -> Result<Self, Box<dyn Error>> {
+    pub fn new(size: usize, mode: AnalyzerMode, sample_rate_opt: Option<u32>) -> Result<Self, Box<dyn Error>> {
         let host = cpal::default_host();
         let device = host
             .default_output_device()
@@ -62,9 +62,19 @@ impl Viravis {
             .expect("no supported config")
             .with_max_sample_rate();
 
+        let sample_rate: u32;
+
+        // TODO: Add check for support of passed sample rate
+
+        if let Some(s_r) = sample_rate_opt {
+            sample_rate = s_r;
+        } else {
+            sample_rate = SAMPLE_RATE;
+        }
+
         let config = StreamConfig {
             channels: supported_config.channels(),
-            sample_rate: SampleRate(SAMPLE_RATE),
+            sample_rate: SampleRate(sample_rate),
             buffer_size: BufferSize::Fixed(CHUNK),
         };
 
