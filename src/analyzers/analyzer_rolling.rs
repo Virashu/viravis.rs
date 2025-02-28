@@ -21,14 +21,19 @@ impl AnalyzerRolling {
 
 impl Analyzer for AnalyzerRolling {
     fn analyze(&mut self, data: &[f32], _: &cpal::InputCallbackInfo) {
-        let mut avg = mean_abs(data) * 1000.0;
+        let avg = mean_abs(data) * 1000.0;
 
         // Equalizing
-        let baseline = mean_nonzero(self.hist.clone());
-        avg /= baseline;
+        let mut baseline = mean_nonzero(self.hist.clone()).powi(2); // Can be 0.0 because of pow()
+
+        if baseline == 0.0 {
+            baseline = 1.0;
+        }
+
+        let avg_norm = avg / baseline * 100.0;
 
         // Rotate
-        self.hist.push_front(avg / baseline * 100.0);
+        self.hist.push_front(avg_norm);
         self.hist.pop_back().unwrap();
 
         // Fade

@@ -7,8 +7,8 @@ use std::{
 use clap::builder::TypedValueParser;
 use clap::Parser;
 
-use viravis::modules::Serial;
-use viravis::{modules::Server, AnalyzerMode, Viravis};
+use viravis::modules;
+use viravis::{AnalyzerMode, Viravis};
 
 const SIZE: usize = 128;
 
@@ -43,7 +43,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Catch data
     let mutex_ref = Arc::clone(&data_mutex);
-    let cb = move |d| {
+    let cb = move |d: Vec<f32>| {
+        for x in d.iter() {
+            if x.is_nan() {
+                log::error!("Encountered a NaN value in analyzer data!\n{:?}", d);
+                return;
+            } else if x.is_infinite() {
+                log::error!("Encountered an Inf value in analyzer data!\n{:?}", d);
+                return;
+            }
+        }
+
         let mut lock = mutex_ref.lock().unwrap();
         *lock = d;
     };
@@ -51,8 +61,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Send data to Server module
     let mutex_ref = Arc::clone(&data_mutex);
     thread::spawn(|| {
-        let mut s = Server::new(mutex_ref);
+        let mut s = modules::HttpServer::new(mutex_ref);
         log::info!("Starting server");
+        s.run();
+    });
+
+    // Send data to Ws Server module
+    let mutex_ref = Arc::clone(&data_mutex);
+    thread::spawn(|| {
+        let s = modules::WebSocketServer::new(mutex_ref);
+        log::info!("Starting websocket server");
         s.run();
     });
 
@@ -60,7 +78,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         // Send data to Serial module
         let mutex_ref = Arc::clone(&data_mutex);
         thread::spawn(|| {
-            let s = Serial::new(mutex_ref, port);
+            let s = modules::Serial::new(mutex_ref, port);
             log::info!("Opening serial port");
             s.run();
         });

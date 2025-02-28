@@ -1,5 +1,7 @@
 use std::collections::VecDeque;
 
+use rustfft::num_traits::Zero;
+
 pub fn mean(input: &[f32]) -> f32 {
     let l: f32 = input.len() as f32;
     let s: f32 = input.iter().sum();
@@ -13,11 +15,12 @@ pub fn mean_abs(input: &[f32]) -> f32 {
 }
 
 pub fn mean_nonzero(input: VecDeque<f32>) -> f32 {
-    let i = input.iter().map(|n| n.abs()).filter(|n| *n != 0.0);
-    let s: f32 = i.clone().sum();
-    let l: f32 = i.count() as f32;
-    if l != 0.0 {
-        s / l
+    let iter_ = input.iter().map(|n| n.abs()).filter(|n| !n.is_zero());
+    let sum_: f32 = iter_.clone().sum();
+    let len_: f32 = iter_.count() as f32;
+
+    if len_ != 0.0 {
+        sum_ / len_
     } else {
         1.0
     }

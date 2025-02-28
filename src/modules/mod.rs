@@ -1,5 +1,7 @@
 mod serial;
-mod server;
+mod http;
+mod websocket;
 
 pub use serial::Serial;
-pub use server::Server;
+pub use http::HttpServer;
+pub use websocket::WebSocketServer;
