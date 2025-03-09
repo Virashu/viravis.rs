@@ -43,7 +43,7 @@ where
     let mut res = Vec::new();
 
     for i in 0..l {
-        let start = if i > window { i - window } else { 0 };
+        let start = i.saturating_sub(window);
         let end = std::cmp::min(l, i + window);
 
         res.push(mean(&input[start..end]));
