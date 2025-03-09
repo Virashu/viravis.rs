@@ -45,7 +45,11 @@ pub struct Viravis {
 }
 
 impl Viravis {
-    pub fn new(size: usize, mode: AnalyzerMode, sample_rate_opt: Option<u32>) -> Result<Self, Box<dyn Error>> {
+    pub fn new(
+        size: usize,
+        mode: AnalyzerMode,
+        sample_rate_opt: Option<u32>,
+    ) -> Result<Self, Box<dyn Error>> {
         let host = cpal::default_host();
         let device = host
             .default_output_device()

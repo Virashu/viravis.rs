@@ -26,7 +26,8 @@ impl HttpServer {
             }
 
             let content_length = format!("Content-Length: {}", content.len());
-            let response = format!("HTTP/1.1 200 OK\r\n{content_length}\r\n{CORS}\r\n\r\n{content}");
+            let response =
+                format!("HTTP/1.1 200 OK\r\n{content_length}\r\n{CORS}\r\n\r\n{content}");
 
             stream.write_all(response.as_bytes()).unwrap();
         }
