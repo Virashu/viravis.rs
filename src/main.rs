@@ -18,7 +18,8 @@ struct Args {
         short,
         long,
         default_value_t = AnalyzerMode::Rolling,
-        value_parser = clap::builder::PossibleValuesParser::new(["fft", "rolling"]).map(|s| s.parse::<AnalyzerMode>().unwrap()))]
+        value_parser = clap::builder::PossibleValuesParser::new(["fft", "rolling"]).map(|s| s.parse::<AnalyzerMode>().unwrap()),
+    )]
     mode: AnalyzerMode,
 
     #[arg(short, long)]
@@ -46,11 +47,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cb = move |d: Vec<f32>| {
         for x in d.iter() {
             if x.is_nan() {
-                log::error!("Encountered a NaN value in analyzer data!\n{:?}", d);
-                return;
+                panic!("Encountered a NaN value in analyzer data!\n{:?}", d);
             } else if x.is_infinite() {
-                log::error!("Encountered an Inf value in analyzer data!\n{:?}", d);
-                return;
+                panic!("Encountered an Inf value in analyzer data!\n{:?}", d);
             }
         }
 
