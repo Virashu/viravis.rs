@@ -5,6 +5,10 @@ use super::{
     Analyzer,
 };
 
+const MOVING_AVERAGE_WINDOW: usize = 3;
+const SMOOTHING_SPEED_UP: f32 = 0.7;
+const SMOOTHING_SPEED_DOWN: f32 = 0.1;
+
 pub struct AnalyzerFFT {
     callback: Box<dyn Fn(Vec<f32>) + Send>,
     fft_planner: RealFftPlanner<f32>,
@@ -34,8 +38,13 @@ impl Analyzer for AnalyzerFFT {
         let fft: Vec<f32> = spectrum.iter().map(|n| n.re.abs() * 20.0).collect();
 
         // Smoothen
-        let s = moving_average(fft, 3); // horizontal
-        let s = smooth_directional(self.hist.clone(), s, 0.7, 0.1);
+        let s = moving_average(fft, MOVING_AVERAGE_WINDOW); // horizontal
+        let s = smooth_directional(
+            self.hist.clone(),
+            s,
+            SMOOTHING_SPEED_UP,
+            SMOOTHING_SPEED_DOWN,
+        );
 
         self.hist = s.clone();
 

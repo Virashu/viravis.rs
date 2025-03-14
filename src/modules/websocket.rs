@@ -31,7 +31,12 @@ impl WebSocketServer {
                     }
 
                     let message = Message::text(content);
-                    let _ = client.send_message(&message);
+                    match client.send_message(&message) {
+                        Ok(_) => {}
+                        Err(_) => {
+                            break;
+                        }
+                    }
 
                     thread::sleep(Duration::from_millis(20));
                 }

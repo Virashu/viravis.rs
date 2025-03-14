@@ -88,7 +88,7 @@ impl Viravis {
 
         let cb = move |d| tx.send(d).unwrap();
 
-        let mut anal: Box<dyn Analyzer + Send> = match mode {
+        let mut anal: Box<dyn Analyzer> = match mode {
             AnalyzerMode::Rolling => Box::new(analyzers::AnalyzerRolling::new(size, cb)),
             AnalyzerMode::Fft => Box::new(analyzers::AnalyzerFFT::new(size, cb)),
         };

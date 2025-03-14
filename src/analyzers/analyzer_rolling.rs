@@ -32,6 +32,10 @@ impl Analyzer for AnalyzerRolling {
 
         let avg_norm = avg / baseline * 100.0;
 
+        if avg_norm.is_infinite() {
+            panic!("Avg is infinite! Baseline is {}", baseline);
+        }
+
         // Rotate
         self.hist.push_front(avg_norm);
         self.hist.pop_back().unwrap();

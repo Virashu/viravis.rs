@@ -47,9 +47,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cb = move |d: Vec<f32>| {
         for x in d.iter() {
             if x.is_nan() {
-                panic!("Encountered a NaN value in analyzer data!\n{:?}", d);
+                panic!("Encountered a `NaN` value in analyzer data!\n{:?}", d);
             } else if x.is_infinite() {
-                panic!("Encountered an Inf value in analyzer data!\n{:?}", d);
+                panic!("Encountered an `inf` value in analyzer data!\n{:?}", d);
             }
         }
 
@@ -99,10 +99,16 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let orig_hook = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |panic_info| {
-        orig_hook(panic_info);
         log::error!("{}", panic_info);
+        orig_hook(panic_info);
         std::process::exit(1);
     }));
+
+    ctrlc::set_handler(|| {
+        log::info!("Exiting Viravis, Goodbye!");
+        std::process::exit(0);
+    })
+    .expect("Failed to set ctrlc handler");
 
     log::info!("Starting Viravis!");
     v.run()?;
