@@ -91,10 +91,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         v.add_callback(viravis::graph::print_graph);
 
         print!("\x1b[?25l");
-        ctrlc::set_handler(|| {
-            print!("\x1b[H\x1b[J\x1b[?25h^C");
-            std::process::exit(0);
-        })?;
     }
 
     let orig_hook = std::panic::take_hook();
@@ -104,7 +100,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         std::process::exit(1);
     }));
 
-    ctrlc::set_handler(|| {
+    ctrlc::set_handler(move || {
+        if args.graph {
+            print!("\x1b[H\x1b[J\x1b[?25h");
+        }
         log::info!("Exiting Viravis, Goodbye!");
         std::process::exit(0);
     })
