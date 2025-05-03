@@ -35,7 +35,7 @@ struct Args {
 
 fn main() -> Result<(), Box<dyn Error>> {
     tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::TRACE)
+        .with_max_level(tracing::Level::DEBUG)
         .init();
 
     let args = Args::parse();
@@ -47,9 +47,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cb = move |d: Vec<f32>| {
         for x in d.iter() {
             if x.is_nan() {
-                panic!("Encountered a `NaN` value in analyzer data!\n{:?}", d);
+                tracing::error!("Encountered a `NaN` value in analyzer data!\n{:?}", d);
+                return;
             } else if x.is_infinite() {
-                panic!("Encountered an `inf` value in analyzer data!\n{:?}", d);
+                tracing::error!("Encountered an `inf` value in analyzer data!\n{:?}", d);
+                return;
             }
         }
 
@@ -57,11 +59,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         *lock = d;
     };
 
+    let mut v = Viravis::new(SIZE, args.mode, args.sample_rate)?;
+    v.add_callback(cb);
+
     // Send data to Server module
     let mutex_ref = Arc::clone(&data_mutex);
     thread::spawn(|| {
         let mut s = modules::HttpServer::new(mutex_ref);
-        info!("Starting server");
+        info!("Starting HTTP server");
         s.run();
     });
 
@@ -82,10 +87,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             s.run();
         });
     }
-
-    let mut v = Viravis::new(SIZE, args.mode, args.sample_rate)?;
-
-    v.add_callback(cb);
 
     if args.graph {
         v.add_callback(viravis::graph::print_graph);

@@ -14,7 +14,9 @@ impl HttpServer {
     }
 
     pub fn run(&mut self) {
-        let listener = TcpListener::bind("0.0.0.0:7777").unwrap();
+        let listener = TcpListener::bind("0.0.0.0:7777")
+            .inspect_err(|_| tracing::error!("Failed to start HTTP server"))
+            .expect("Failed to start HTTP server");
 
         let arc_ref = self.data_mutex.clone();
         for mut stream in listener.incoming().filter_map(Result::ok) {

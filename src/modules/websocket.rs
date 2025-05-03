@@ -15,7 +15,9 @@ impl WebSocketServer {
     }
 
     pub fn run(&self) {
-        let server = Server::bind("0.0.0.0:7778").unwrap();
+        let server = Server::bind("0.0.0.0:7778")
+            .inspect_err(|_| tracing::error!("Failed to start websocket server"))
+            .expect("Failed to start websocket server");
 
         for connection in server.filter_map(Result::ok) {
             let arc_ref = self.data_mutex.clone();
