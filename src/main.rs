@@ -3,6 +3,7 @@ use std::{
     error::Error,
     sync::{Arc, Mutex},
 };
+use tracing::{error, info};
 
 use clap::builder::TypedValueParser;
 use clap::Parser;
@@ -33,9 +34,8 @@ struct Args {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    colog::default_builder()
-        .filter(None, log::LevelFilter::Debug)
-        .filter(Some("saaba"), log::LevelFilter::Warn)
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::TRACE)
         .init();
 
     let args = Args::parse();
@@ -61,7 +61,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mutex_ref = Arc::clone(&data_mutex);
     thread::spawn(|| {
         let mut s = modules::HttpServer::new(mutex_ref);
-        log::info!("Starting server");
+        info!("Starting server");
         s.run();
     });
 
@@ -69,7 +69,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mutex_ref = Arc::clone(&data_mutex);
     thread::spawn(|| {
         let s = modules::WebSocketServer::new(mutex_ref);
-        log::info!("Starting websocket server");
+        info!("Starting websocket server");
         s.run();
     });
 
@@ -78,7 +78,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mutex_ref = Arc::clone(&data_mutex);
         thread::spawn(|| {
             let s = modules::Serial::new(mutex_ref, port);
-            log::info!("Opening serial port");
+            tracing::info!("Opening serial port");
             s.run();
         });
     }
@@ -95,7 +95,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let orig_hook = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |panic_info| {
-        log::error!("{}", panic_info);
+        error!("{}", panic_info);
         orig_hook(panic_info);
         std::process::exit(1);
     }));
@@ -104,12 +104,12 @@ fn main() -> Result<(), Box<dyn Error>> {
         if args.graph {
             print!("\x1b[H\x1b[J\x1b[?25h");
         }
-        log::info!("Exiting Viravis, Goodbye!");
+        info!("Exiting Viravis, Goodbye!");
         std::process::exit(0);
     })
     .expect("Failed to set ctrlc handler");
 
-    log::info!("Starting Viravis!");
+    info!("Starting Viravis");
     v.run()?;
 
     Ok(())

@@ -2,6 +2,7 @@ use std::error::Error;
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{BufferSize, InputCallbackInfo, SampleRate, StreamConfig};
+use tracing::info;
 
 use std::sync::mpsc::{channel, Receiver};
 
@@ -55,7 +56,7 @@ impl Viravis {
             .default_output_device()
             .expect("No default output device");
 
-        log::info!("Selected device: `{}`", device.name()?);
+        info!("Selected device: `{}`", device.name()?);
 
         let mut supported_configs_range = device
             .supported_output_configs()
@@ -82,7 +83,7 @@ impl Viravis {
             buffer_size: BufferSize::Fixed(CHUNK),
         };
 
-        log::info!("Selected config: {:?}", config);
+        info!("Selected config: {:?}", config);
 
         let (tx, rx) = channel();
 

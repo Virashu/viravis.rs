@@ -3,24 +3,27 @@ use std::collections::VecDeque;
 use rustfft::num_traits::Zero;
 
 pub fn mean(input: &[f32]) -> f32 {
-    let l: f32 = input.len() as f32;
-    let s: f32 = input.iter().sum();
-    s / l
+    let len = input.len();
+    let sum: f32 = input.iter().sum();
+
+    sum / (len as f32)
 }
 
 pub fn mean_abs(input: &[f32]) -> f32 {
-    let l: f32 = input.len() as f32;
-    let s: f32 = input.iter().map(|n| n.abs()).sum();
-    s / l
+    let len = input.len();
+    let sum: f32 = input.iter().map(|n| n.abs()).sum();
+
+    sum / (len as f32)
 }
 
 pub fn mean_nonzero(input: VecDeque<f32>) -> f32 {
-    let iter_ = input.iter().map(|n| n.abs()).filter(|n| !n.is_zero());
-    let sum_: f32 = iter_.clone().sum();
-    let len_: f32 = iter_.count() as f32;
+    let iter = input.iter().map(|n| n.abs()).filter(|n| !n.is_zero());
 
-    if len_ != 0.0 {
-        sum_ / len_
+    let sum: f32 = iter.clone().sum();
+    let len = iter.count();
+
+    if len != 0 {
+        sum / (len as f32)
     } else {
         1.0
     }
@@ -66,7 +69,7 @@ pub fn fade_linear<T: std::iter::FromIterator<f32>>(input: Vec<f32>, by: f32) ->
     input
         .iter()
         .map(|n| n - by)
-        .map(|n| if n > 0.0 { n } else { 0.0 })
+        .map(|n| n.max(0.0)) // Clamp bottom
         .collect()
 }
 
@@ -75,6 +78,6 @@ pub fn fade_exponent<T: std::iter::FromIterator<f32>>(input: Vec<f32>, by: f32) 
         .iter()
         .enumerate()
         .map(|(i, n)| n - by * i as f32)
-        .map(|n| if n > 0.0 { n } else { 0.0 })
+        .map(|n| n.max(0.0)) // Clamp bottom
         .collect()
 }
