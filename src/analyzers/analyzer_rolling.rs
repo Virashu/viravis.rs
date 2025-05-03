@@ -26,7 +26,7 @@ impl Analyzer for AnalyzerRolling {
         // Equalizing
         let mut baseline = mean_nonzero(self.hist.clone()).powi(2); // Can be subnormal because of pow()
 
-        if baseline.is_subnormal() {
+        if baseline.is_subnormal() || baseline == 0.0 {
             baseline = 1.0;
         }
 
