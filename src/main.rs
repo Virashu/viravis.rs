@@ -72,7 +72,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Send data to Server module
     let mutex_ref = data_mutex.clone();
     thread::spawn(|| {
-        let mut s = modules::HttpServer::new(mutex_ref);
+        let s = modules::HttpServer::new(mutex_ref);
         info!("Starting HTTP server");
         s.run();
     });

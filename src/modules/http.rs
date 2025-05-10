@@ -13,7 +13,7 @@ impl HttpServer {
         Self { data_mutex }
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&self) {
         let listener = TcpListener::bind("0.0.0.0:7777")
             .inspect_err(|_| tracing::error!("Failed to start HTTP server"))
             .expect("Failed to start HTTP server");
