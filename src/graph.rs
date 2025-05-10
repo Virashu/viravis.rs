@@ -66,3 +66,11 @@ pub fn print_graph(data: Vec<f32>) {
         out.flush().unwrap();
     }
 }
+
+pub fn init() {
+    print!("\x1b[?25l");
+}
+
+pub fn clear() {
+    print!("\x1b[H\x1b[J\x1b[?25h");
+}

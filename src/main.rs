@@ -50,7 +50,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let data_mutex = Arc::new(Mutex::new(vec![0.0; SIZE]));
 
     // Catch data
-    let mutex_ref = Arc::clone(&data_mutex);
+    let mutex_ref = data_mutex.clone();
     let cb = move |d: Vec<f32>| {
         for x in d.iter() {
             if x.is_nan() {
@@ -70,7 +70,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     v.add_callback(cb);
 
     // Send data to Server module
-    let mutex_ref = Arc::clone(&data_mutex);
+    let mutex_ref = data_mutex.clone();
     thread::spawn(|| {
         let mut s = modules::HttpServer::new(mutex_ref);
         info!("Starting HTTP server");
@@ -78,7 +78,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     });
 
     // Send data to Ws Server module
-    let mutex_ref = Arc::clone(&data_mutex);
+    let mutex_ref = data_mutex.clone();
     thread::spawn(|| {
         let s = modules::WebSocketServer::new(mutex_ref);
         info!("Starting websocket server");
@@ -87,7 +87,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     if let Some(port) = args.port {
         // Send data to Serial module
-        let mutex_ref = Arc::clone(&data_mutex);
+        let mutex_ref = data_mutex.clone();
         thread::spawn(|| {
             let s = modules::Serial::new(mutex_ref, port);
             tracing::info!("Opening serial port");
@@ -97,8 +97,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     if args.graph {
         v.add_callback(graph::print_graph);
-
-        print!("\x1b[?25l");
+        graph::init();
     }
 
     let orig_hook = std::panic::take_hook();
@@ -110,7 +109,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     ctrlc::set_handler(move || {
         if args.graph {
-            print!("\x1b[H\x1b[J\x1b[?25h");
+            graph::clear();
         }
         info!("Exiting Viravis, Goodbye!");
         std::process::exit(0);
