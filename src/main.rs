@@ -3,32 +3,39 @@ use std::{
     error::Error,
     sync::{Arc, Mutex},
 };
+
+use clap::Parser;
 use tracing::{error, info};
 
-use clap::builder::TypedValueParser;
-use clap::Parser;
-
-use viravis::modules;
 use viravis::{AnalyzerMode, Viravis};
+
+mod analyzers;
+mod graph;
+mod modules;
+mod viravis;
 
 const SIZE: usize = 128;
 
 #[derive(Parser)]
 struct Args {
+    /// Visualization mode
     #[arg(
         short,
         long,
+        value_enum,
         default_value_t = AnalyzerMode::Rolling,
-        value_parser = clap::builder::PossibleValuesParser::new(["fft", "rolling"]).map(|s| s.parse::<AnalyzerMode>().unwrap()),
     )]
     mode: AnalyzerMode,
 
+    /// Serial port with Viravis Arduino (optional)
     #[arg(short, long)]
     port: Option<String>,
 
+    /// Turn on visualization in cli
     #[arg(long, action)]
     graph: bool,
 
+    /// Audio sample rate
     #[arg(long)]
     sample_rate: Option<u32>,
 }
@@ -89,7 +96,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     if args.graph {
-        v.add_callback(viravis::graph::print_graph);
+        v.add_callback(graph::print_graph);
 
         print!("\x1b[?25l");
     }

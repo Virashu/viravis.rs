@@ -24,16 +24,16 @@ impl Analyzer for AnalyzerRolling {
         let avg = mean_abs(data) * 1000.0;
 
         // Equalizing
-        let mut baseline = mean_nonzero(self.hist.clone()).powi(2); // Can be subnormal because of pow()
+        let mut baseline = mean_nonzero(self.hist.clone()).powi(2);
 
         if baseline.is_subnormal() || baseline == 0.0 {
             baseline = 1.0;
         }
 
-        let avg_norm = (avg / baseline) * 100.0;
+        let mut avg_norm = (avg / baseline) * 100.0;
 
         if avg_norm.is_infinite() {
-            panic!("Avg is infinite! Baseline is {}", baseline);
+            avg_norm = avg;
         }
 
         // Rotate

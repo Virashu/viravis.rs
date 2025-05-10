@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::sync::{Arc, Mutex};
 
+use clap::ValueEnum;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{BufferSize, InputCallbackInfo, SampleRate, StreamConfig};
 use tracing::info;
@@ -12,9 +13,11 @@ use crate::analyzers::{self, Analyzer};
 const CHUNK: u32 = 960;
 const DEFAULT_SAMPLE_RATE: u32 = 48_000;
 
-#[derive(Clone)]
+#[derive(Clone, ValueEnum)]
 pub enum AnalyzerMode {
+    /// Fast Fourier Transform (columns by frequency)
     Fft,
+    /// Wave-like effect by volume
     Rolling,
 }
 
