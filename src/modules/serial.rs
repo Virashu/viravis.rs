@@ -15,10 +15,7 @@ impl Serial {
     }
 
     fn get_data(&self) -> String {
-        let mut data: Vec<f32>;
-        {
-            data = self.data_mutex.lock().unwrap().clone();
-        }
+        let mut data = { self.data_mutex.lock().unwrap().clone() };
 
         if data.len() > LEDS {
             data = Vec::from(&data[0..LEDS]);

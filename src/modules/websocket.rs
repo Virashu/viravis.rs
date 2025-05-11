@@ -15,9 +15,7 @@ impl WebSocketServer {
     }
 
     pub fn run(&self) {
-        let server = Server::bind("0.0.0.0:7778")
-            .inspect_err(|_| tracing::error!("Failed to start websocket server"))
-            .expect("Failed to start websocket server");
+        let server = Server::bind("0.0.0.0:7778").expect("Failed to start websocket server");
 
         for connection in server.filter_map(Result::ok) {
             let arc_ref = self.data_mutex.clone();
@@ -26,14 +24,10 @@ impl WebSocketServer {
                 let mut client = connection.accept().unwrap();
 
                 loop {
-                    let content;
-                    {
-                        let data = arc_ref.lock().unwrap();
-                        content = json::stringify((*data).clone());
-                    }
+                    let data = { arc_ref.lock().unwrap().clone() };
+                    let json_string = json::stringify(data);
 
-                    let message = Message::text(content);
-                    match client.send_message(&message) {
+                    match client.send_message(&Message::text(json_string)) {
                         Ok(_) => {}
                         Err(_) => {
                             break;

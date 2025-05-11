@@ -54,10 +54,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cb = move |d: Vec<f32>| {
         for x in d.iter() {
             if x.is_nan() {
-                tracing::error!("Encountered a `NaN` value in analyzer data!\n{:?}", d);
+                error!("Encountered a `NaN` value in analyzer data!\n{:?}", d);
                 return;
             } else if x.is_infinite() {
-                tracing::error!("Encountered an `inf` value in analyzer data!\n{:?}", d);
+                error!("Encountered an `inf` value in analyzer data!\n{:?}", d);
                 return;
             }
         }
@@ -90,7 +90,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mutex_ref = data_mutex.clone();
         thread::spawn(|| {
             let s = modules::Serial::new(mutex_ref, port);
-            tracing::info!("Opening serial port");
+            info!("Opening serial port");
             s.run();
         });
     }
@@ -114,7 +114,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         info!("Exiting Viravis, Goodbye!");
         std::process::exit(0);
     })
-    .expect("Failed to set ctrlc handler");
+    .expect("Failed to set ctrl-c handler");
 
     info!("Starting Viravis");
     v.run()?;

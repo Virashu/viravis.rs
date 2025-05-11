@@ -14,22 +14,15 @@ impl HttpServer {
     }
 
     pub fn run(&self) {
-        let listener = TcpListener::bind("0.0.0.0:7777")
-            .inspect_err(|_| tracing::error!("Failed to start HTTP server"))
-            .expect("Failed to start HTTP server");
+        let listener = TcpListener::bind("0.0.0.0:7777").expect("Failed to start HTTP server");
 
-        let arc_ref = self.data_mutex.clone();
         for mut stream in listener.incoming().filter_map(Result::ok) {
-            let content;
+            let data = { self.data_mutex.lock().unwrap().clone() };
+            let json_string = json::stringify(data);
 
-            {
-                let data = arc_ref.lock().unwrap();
-                content = json::stringify((*data).clone());
-            }
-
-            let content_length = format!("Content-Length: {}", content.len());
+            let content_length = format!("Content-Length: {}", json_string.len());
             let response =
-                format!("HTTP/1.1 200 OK\r\n{content_length}\r\n{CORS}\r\n\r\n{content}");
+                format!("HTTP/1.1 200 OK\r\n{content_length}\r\n{CORS}\r\n\r\n{json_string}");
 
             stream.write_all(response.as_bytes()).unwrap();
         }
